@@ -54,7 +54,7 @@ def precompile_assets
     Rake::Task['assets:precompile'].invoke
   end
 
-  if Rails::VERSION::MAJOR > 3
+  if Rails.application.respond_to?(:assets_manifest)
     # Make a new manifest since assets weren't compiled before
     config = Rails.application.config
     path = File.join(config.paths['public'].first, config.assets.prefix)
@@ -104,4 +104,12 @@ end
 
 def wait_for_turbolinks_to_be_available
   sleep(1)
+end
+
+
+# The block depends on sprockets, don't run it if sprockets is missing
+def when_sprockets_available
+  if !SKIP_SPROCKETS
+    yield
+  end
 end

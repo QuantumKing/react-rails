@@ -7,6 +7,15 @@ appraise "rails-4.0" do
   gem 'rails', '~> 4.0.13'
 end
 
+appraise "rails-4.0.5" do
+  # Depends on sprockets-rails ~> 2.0.0. Support for
+  # `Rails.application.assets_manifest` which is used by
+  # `ServerRendering::ManifestContainer` has only been added in
+  # sprockets-rails 2.2.2. Ensure that server rendering falls back to
+  # `ServerRendering::EnvironmentContainer`.`
+  gem 'rails', '4.0.5'
+end
+
 appraise "rails-4.0-with-therubyracer" do
   gem 'rails', '~> 4.0.13'
   gem 'therubyracer', '0.12.0', :platform => :mri
@@ -29,7 +38,19 @@ appraise "rails-4.2-sprockets_3" do
   gem "turbolinks", "~> 2.5.0"
 end
 
+appraise "rails-4.2-sprockets_4" do
+  gem 'rails', '~> 4.2.1'
+  gem "sprockets", "~> 4.0.x"
+  gem "turbolinks", "~> 2.5.0"
+end
+
 appraise "rails-5" do
   gem 'rails', '~> 5.0.0.beta2'
+  gem "turbolinks", "~> 5.0.0.beta"
+end
+
+appraise "rails-5-sprockets_4" do
+  gem "rails", "~> 5.0.0.beta2"
+  gem "sprockets", "~> 4.0.x"
   gem "turbolinks", "~> 5.0.0.beta"
 end

@@ -25,7 +25,7 @@ module React
       end
 
       # Include the react-rails view helper lazily
-      initializer "react_rails.setup_view_helpers", group: :all do |app|
+      initializer "react_rails.setup_view_helpers", after: :load_config_initializers, group: :all do |app|
 
         app.config.react.jsx_transformer_class ||= React::JSX::DEFAULT_TRANSFORMER
         React::JSX.transformer_class = app.config.react.jsx_transformer_class
@@ -53,14 +53,16 @@ module React
         end
       end
 
-      initializer "react_rails.bust_cache", group: :all do |app|
+      initializer "react_rails.bust_cache", after: :load_config_initializers, group: :all do |app|
         asset_variant = React::Rails::AssetVariant.new({
           variant: app.config.react.variant,
           addons: app.config.react.addons,
         })
 
-        sprockets_env = app.assets || app.config.assets # sprockets-rails 3.x attaches this at a different config
-        sprockets_env.version = [sprockets_env.version, "react-#{asset_variant.react_build}",].compact.join('-')
+        sprockets_env = app.assets || app.config.try(:assets) # sprockets-rails 3.x attaches this at a different config
+        if !sprockets_env.nil?
+          sprockets_env.version = [sprockets_env.version, "react-#{asset_variant.react_build}",].compact.join('-')
+        end
 
       end
 
@@ -70,8 +72,10 @@ module React
           addons: app.config.react.addons,
         })
 
-        app.config.assets.paths << asset_variant.react_directory
-        app.config.assets.paths << asset_variant.jsx_directory
+        if app.config.respond_to?(:assets)
+          app.config.assets.paths << asset_variant.react_directory
+          app.config.assets.paths << asset_variant.jsx_directory
+        end
       end
 
       config.after_initialize do |app|
@@ -85,16 +89,28 @@ module React
 
         React::ServerRendering.reset_pool
         # Reload renderers in dev when files change
-        ActionDispatch::Reloader.to_prepare { React::ServerRendering.reset_pool }
+        if Gem::Version.new(::Rails::VERSION::STRING) >= Gem::Version.new("5.x")
+          ActiveSupport::Reloader.to_prepare { React::ServerRendering.reset_pool }
+        else
+          ActionDispatch::Reloader.to_prepare { React::ServerRendering.reset_pool }
+        end
       end
 
       initializer "react_rails.setup_engine", :group => :all do |app|
-        sprockets_env = app.assets || Sprockets # Sprockets 3.x expects this in a different place
-        if Gem::Version.new(Sprockets::VERSION) >= Gem::Version.new("3.0.0")
-          sprockets_env.register_mime_type("application/jsx", extensions: [".jsx", ".js.jsx", ".es.jsx", ".es6.jsx"])
-          sprockets_env.register_transformer("application/jsx", "application/javascript", React::JSX::Processor)
-        else
-          sprockets_env.register_engine(".jsx", React::JSX::Template)
+        # Sprockets 3.x expects this in a different place
+        sprockets_env = app.assets || defined?(Sprockets) && Sprockets
+
+        if !sprockets_env.nil?
+          if Gem::Version.new(Sprockets::VERSION) >= Gem::Version.new("4.x")
+            sprockets_env.register_mime_type("application/jsx", extensions: [".jsx", ".js.jsx", ".es.jsx", ".es6.jsx"])
+            sprockets_env.register_transformer("application/jsx", "application/javascript", React::JSX::Processor)
+            sprockets_env.register_mime_type("application/jsx+coffee", extensions: [".jsx.coffee", ".js.jsx.coffee"])
+            sprockets_env.register_transformer("application/jsx+coffee", "application/jsx", Sprockets::CoffeeScriptProcessor)
+          elsif Gem::Version.new(Sprockets::VERSION) >= Gem::Version.new("3.0.0")
+            sprockets_env.register_engine(".jsx", React::JSX::Processor, mime_type: "application/javascript")
+          else
+            sprockets_env.register_engine(".jsx", React::JSX::Template)
+          end
         end
       end
     end

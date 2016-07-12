@@ -8,6 +8,52 @@
 
 #### Bug Fixes
 
+## 1.8.0 (June 29, 2016)
+
+#### New Features
+
+- Sprockets 4 Support 🎉 #560
+- Depend on Railties, not Rails #558
+- Don't depend on `sprockets/railtie` #558
+- Expose `React.camelize_props(props_hash)` #556
+- Add `rails generate react:ujs --output=...` for copying the UJS into your app #557
+- Support Babel 6 module exports & extension point `ReactRailsUJS.getConstructor` #503
+
+## 1.7.2 (June 19, 2016)
+
+#### New Features
+
+- Improved error messages for missing components #538
+
+#### Bug Fixes
+
+- Fix `view_helper_implementation` config #551
+- Fallback to `EnvironmentContainer` for server rendering when manifest isn't available #545
+
+## 1.7.1 (May 10, 2016)
+
+#### New Features
+
+- Update to React 15.0.2 #525
+
+#### Bug Fixes
+
+- Update `.to_prepare` for Rails 5 #526
+- Use `register_engine` with Sprockets 3 to avoid compiling _all_ files #522
+
+## 1.7.0 (April 29, 2016)
+
+#### New Features
+
+- Update to React 15.0.1 #512
+- Support PJAX #518
+- Static renders don't include `data-react-` attributes #497
+
+#### Bug Fixes
+
+- Better unmounting on Turbolinks 5 #521
+- Fix console replay #496
+
 ## 1.6.2 (February 28, 2016)
 
 #### Bug Fixes

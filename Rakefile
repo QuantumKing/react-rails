@@ -37,7 +37,6 @@ namespace :react do
       copy_react_asset("#{environment}/react-server-with-addons.js", "#{environment}-with-addons/react-server.js")
 
       addons = %w(
-        addons-clone-with-props
         addons-create-fragment
         addons-css-transition-group
         addons-linked-state-mixin
@@ -70,6 +69,7 @@ Rake::TestTask.new(:test) do |t|
   t.libs << 'test'
   t.pattern = ENV['TEST_PATTERN'] || 'test/**/*_test.rb'
   t.verbose = ENV['TEST_VERBOSE'] == '1'
+  t.warning = false
 end
 
 task default: :test
